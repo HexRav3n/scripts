@@ -1,6 +1,8 @@
 # Library of Useful Scripts:
 
 `website-testing.sh` runs the following tools:
+
+*Make sure to install the tools first and add them to your path*
 - CMSeek  
 - Dorks Hunter  
 - Shodan subdomains  
