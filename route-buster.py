@@ -16,20 +16,33 @@ def colorize_status(status_code):
 parser = argparse.ArgumentParser()
 parser.add_argument('-t','--target', help='host/ip to target', required=True)
 parser.add_argument('-w','--wordlist', help='wordlist to use')
+parser.add_argument('-d','--debug', help='enable debug output', action='store_true')
 args = parser.parse_args()
 
 actions = []
 
 s = requests.Session()
+s.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1'
+})
 
 
 
 with open(args.wordlist, "r") as f:
     for word in f:
             status_msg = word.strip()[:80]
-            print('\r' + ' '*100 + '\r' + status_msg, end='', flush=True)
+            if not args.debug:
+                print('\r' + ' '*100 + '\r' + status_msg, end='', flush=True)
 
             url = "{target}{word}".format(target=args.target, word=word.strip())
+
+            if args.debug:
+                print(f"\n[DEBUG] Testing: {url}")
 
             r_get = s.get(url=url).status_code
             r_post = s.post(url=url).status_code
@@ -37,6 +50,9 @@ with open(args.wordlist, "r") as f:
             r_patch = s.patch(url=url).status_code
             r_options = s.options(url=url).status_code
             r_head = s.head(url=url).status_code
+
+            if args.debug:
+                print(f"[DEBUG] Status codes - GET:{r_get} POST:{r_post} PUT:{r_put} PATCH:{r_patch} OPTIONS:{r_options} HEAD:{r_head}")
 
             if(r_get not in [204,401,403,404] or r_post not in [204,401,403,404] or r_put not in [204,401,403,404] or r_patch not in [204,401,403,404] or r_options not in [204,401,403,404] or r_head not in [204,401,403,404]):
                 print('\r' + ' '*100 + '\r', end='')
